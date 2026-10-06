@@ -20,7 +20,8 @@ def mainMenu():
     print("4) Select deck for studying")
     print("5) Remove a deck")
     print("6) Exit program")
-    
+
+# Function to create a new deck
 def createDeck():
     deckName = input("What is the name of this deck? ")
     
@@ -37,8 +38,24 @@ def createDeck():
     
     connection.close() # close database
 
+# Function shows decks
 def viewDecks():
-    pass
+    connection = sqlite3.connect("studyGuide.db")
+    
+    cursor = connection.cursor()
+    
+    cursor.execute("SELECT * FROM Decks")
+    decks = cursor.fetchall()
+    
+    if not decks:
+        print('There are no created decks.\n')
+        connection.close()
+        return
+    
+    for deck in decks:
+        print(f'\nID:{deck[0]} Name:{deck[1]}')
+    
+    connection.close()
 
 def editDeck():
     pass
@@ -46,20 +63,24 @@ def editDeck():
 def studyDeck():
     pass
 
+# Function shows decks, takes user input for which deck to delete, and gives confirmation of deletion
 def removeDeck():
     connection = sqlite3.connect("studyGuide.db")
     
     cursor = connection.cursor()
     
-    cursor.execute("SELECT * FROM Decks")
-    decks = cursor.fetchall()
-    print(f'\n{decks}')
+    viewDecks()
     
     deckSelection = input('Enter the ID # of the deck you wish to remove: ')
     
     cursor.execute("""SELECT Name FROM Decks
                         WHERE ID = ?""", (deckSelection,))
     removedDeck = cursor.fetchone()
+    
+    if removedDeck is None:
+        print('\nDeck not found.\n')
+        connection.close()
+        return
     
     cursor.execute("""DELETE FROM Decks
                         WHERE ID = ?""", (deckSelection,))
@@ -90,7 +111,7 @@ while True:
         case "5":
             removeDeck()
         case "6":
-            print("Goodbye!")
+            print("Goodbye!\n")
             break
         case _:
-            print("Invalid input.  Please enter 1-5.")
+            print("Invalid input.  Please enter 1-6.\n")
